@@ -1,1 +1,148 @@
+##################################################
+######### Nicole Felts ### Nava Rastegar #########
+###### Wildlife Ecology End of Term Project ######
+##################################################
+##################################################
+################### GOALS ########################
+# To understand the relationship between 4 stream-adjacent land cover types
+# and the relative abundance of 4 macroinvertebrate classifications over ~ 9 years.
+##################################################
+##################################################
+# Working directory for the data.
+setwd("C:\\Users\\Nava\\OneDrive\\Desktop\\ArcGIS_Projects")
+######    THIS IS OUR CURRENT CSV FILE !!!!! #####
+coverdata <- read.csv("cover_w_watershed.csv", header=TRUE)
+attach(coverdata) # attach the dataframe so we don't have to keep typing it every time.
+##################################################
+##################################################
+##################################################
+# two fixed effects: land use and year & those two combined. 
+# random effect: watershed & stream order which is nested within watershed.
+# run assumption tests; is it normally dist, risid are random, indept
+# 
+##################################################
+##################################################
+##################################################
+##                INSTALL PACKAGES              ##
+##################################################
+install.packages("dplyr")
+library(dplyr)
+install.packages("plyr")
+library(plyr)
+install.packages("lme4")
+library(lme4)
+install.packages("car")
+library(car)
+##################################################
+##          CODE FOR EXPLORATORY ANALYSIS       ##
+##################################################
+attach(coverdata)
+count(coverdata, "ADJ_COVR") # count of all cover types.
+## We chose 4 covers to be our variables. 
+### CP = cropland, FR = Forest, PA = pasture, PV = paved road
+#########
+str(coverdata)
+### check data 
+coverdata$YEAR <- (factor(coverdata$YEAR))
+### convert YEAR to factor
+test <- subset(coverdata, ADJ_COVR=="FR"|ADJ_COVR=="PA"|ADJ_COVR=="PV"|ADJ_COVR=="CP")
+### remove irrelevent rows by cover
+anova_detrit<- aov(test$RA_detrit~test$ADJ_COVR)
 
+detrit.aov <- anova(lm(test$RA_detrit~test$ADJ_COVR))
+detrit.aov
+pred.aov <- anova(lm(test$RA_pred~test$ADJ_COVR))
+pred.aov
+herb.aov <- anova(lm(test$RA_herb~test$ADJ_COVR))
+herb.aov
+collect.aov <- anova(lm(test$RA_collect~test$ADJ_COVR))
+collect.aov
+summary(lm(test$RA_detrit~test$ADJ_COVR))
+summary(lm(test$RA_collect~test$ADJ_COVR))
+summary(lm(test$RA_herb~test$ADJ_COVR))
+summary(lm(test$RA_pred~test$ADJ_COVR))
+summary(detrit.aov)
+summary(pred.aov)
+summary(herb.aov)
+summary(collect.aov)
+TukeyHSD(detrit.aov) # why isn't this working?
+### type 1 anova and summary of aovs
+Anova(anova_detrit, type= "II")
+anova_herb<- aov(test$RA_herb~test$YEAR*test$ADJ_COVR)
+Anova(anova_herb, type= "II")
+anova_collect<- aov(test$RA_collect~test$YEAR*test$ADJ_COVR)
+Anova(anova_collect, type= "II")
+anova_pred<- aov(test$RA_pred~test$YEAR*test$ADJ_COVR)
+Anova(anova_pred, type= "II")
+### attempt to use type 2 anova
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_detrit)
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_collect)
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_herb)
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_pred)
+###testing interactions between year and ADJ_COVER- seems to be very little interaction
+
+##################################################
+##                RUN ASSUMPTIONS               ##
+##################################################
+detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
+summary(detrit.lm)
+collect.lm <- lm(RA_collect ~ ADJ_COVR, data = coverdata)
+summary(collect.lm)
+detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
+summary(detrit.lm)
+detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
+summary(detrit.lm)
+boxplot(Detritivore ~ ADJ_COVR, data = coverdata)
+##################################################
+##                 TO DO                        ##
+##################################################
+### 
+### 1. How do we run assumptions tests on data that
+####      is using proportions?
+### 2. How do we aggregate all the data (year, relative abundance, land cover)
+####      so we can run proper analyses?
+### 3. Is our current anova correct? Why isn't the Tukey HSD working?
+### 4. 
+##################################################
+##################################################
+##################################################
+##################################################
+##################################################
+##    OLD CODE WHERE WE MANIPULATED THE DATA    ##
+##    THAT WE DON'T NEED TO RUN ANY MORE        ##
+##################################################
+# Load in each data file.
+taxadata  <- read.csv("taxadata.csv", header=TRUE)
+LULC  <- read.csv("LULC.csv", header=TRUE)
+# We merged the taxa data and the land use files.
+data<- merge(taxadata, LULC)
+# We removed the N/As from the ADJ_COVR column.
+data_no_null<- data[!(data$ADJ_COVR=="N/A"),]
+# We removed the adjacent covers with more than one type by deleting everything
+# where the string was greater than 3 characters.
+data3 <- data_no_null[!nchar(as.character(data_no_null$ADJ_COVR))> 3,]
+# REMOVED THE ADJ_COVR LF & OR BECAUSE IT DIDNT HAVE ENOUGH DATA
+data4 <- data3[!(data3$ADJ_COVR=="LF"),]
+coverdata <- data4[!(data4$ADJ_COVR=="OR"),]
+# WROTE NEW CSV FOR FINAL MANIPULATED DATA
+write.csv(coverdata, 'simplecoverdata.csv')
+# load in the watershed data
+watersheddata  <- read.csv("Points_in_watersheds.csv", header=TRUE)
+# We merged the simplecoverdata and the watershed points.
+finaldata<- merge(coverdata, watersheddata)
+##################################################
+##################################################
+##############      EXTRA CODE       ############
+# count of all the different taxa observed per group
+tapply(MBSSdata$N_TAXA, MBSSdata$FFG_Swan, sum)
+sum(MBSSdata$N_TAXA)
+57373/248449
+# 23.1% detritivores total
