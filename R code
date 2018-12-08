@@ -8,14 +8,16 @@
 # and the relative abundance of 4 macroinvertebrate classifications over ~ 9 years.
 ##################################################
 ##################################################
-# Working directory for the data.
-setwd("C:\\Users\\Nava\\OneDrive\\Desktop\\ArcGIS_Projects")
+getwd() #Check working directory.
+# Adjust working directory for the data as necessary.
+setwd("C:/Users/nef21/Downloads")
 ######    THIS IS OUR CURRENT CSV FILE !!!!! #####
 coverdata <- read.csv("cover_w_watershed.csv", header=TRUE)
 attach(coverdata) # attach the dataframe so we don't have to keep typing it every time.
 ##################################################
 ##################################################
 ##################################################
+## #NF Can you please explain the notations below?
 # two fixed effects: land use and year & those two combined. 
 # random effect: watershed & stream order which is nested within watershed.
 # run assumption tests; is it normally dist, risid are random, indept
@@ -25,13 +27,17 @@ attach(coverdata) # attach the dataframe so we don't have to keep typing it ever
 ##################################################
 ##                INSTALL PACKAGES              ##
 ##################################################
-install.packages("dplyr")
+#install packages below if necessary by removing the hashtags below.
+#### #NF GETTING AN ERROR? If the package is not installing properly, 
+#### change the download location in the library.
+# install.packages("dplyr")
+# install.packages("plyr")
+# install.packages("lme4")
+# install.packages("car")
+
 library(dplyr)
-install.packages("plyr")
 library(plyr)
-install.packages("lme4")
 library(lme4)
-install.packages("car")
 library(car)
 ##################################################
 ##          CODE FOR EXPLORATORY ANALYSIS       ##
@@ -40,23 +46,30 @@ attach(coverdata)
 count(coverdata, "ADJ_COVR") # count of all cover types.
 ## We chose 4 covers to be our variables. 
 ### CP = cropland, FR = Forest, PA = pasture, PV = paved road
-#########
-str(coverdata)
-### check data 
-coverdata$YEAR <- (factor(coverdata$YEAR))
-### convert YEAR to factor
-test <- subset(coverdata, ADJ_COVR=="FR"|ADJ_COVR=="PA"|ADJ_COVR=="PV"|ADJ_COVR=="CP")
-### remove irrelevent rows by cover
-anova_detrit<- aov(test$RA_detrit~test$ADJ_COVR)
 
+
+### check data (#NF How? What are you doing to check the data and
+### what does it tell us? Since I wasn't there, this notation doesn't 
+### make sense to me.)
+str(coverdata)
+
+### convert YEAR to a factor. (#NF Could you explain why you did this?)
+coverdata$YEAR <- (factor(coverdata$YEAR))
+
+### remove irrelevent rows by cover. (#NF Are you making a subset of 
+### our data with only these 4 cover groups? Awesome!)
+test <- subset(coverdata, ADJ_COVR=="FR"|ADJ_COVR=="PA"|ADJ_COVR=="PV"|ADJ_COVR=="CP")
+
+anova_detrit<- aov(test$RA_detrit~test$ADJ_COVR)
+anova_detrit #NF this did not return anything significant
 detrit.aov <- anova(lm(test$RA_detrit~test$ADJ_COVR))
-detrit.aov
+detrit.aov #NF this returned a significant p value.
 pred.aov <- anova(lm(test$RA_pred~test$ADJ_COVR))
-pred.aov
+pred.aov #NF this returned a significant p value.
 herb.aov <- anova(lm(test$RA_herb~test$ADJ_COVR))
-herb.aov
+herb.aov #NF this returned a slightly significant p value.
 collect.aov <- anova(lm(test$RA_collect~test$ADJ_COVR))
-collect.aov
+collect.aov #NF this returned a very significant p value.
 summary(lm(test$RA_detrit~test$ADJ_COVR))
 summary(lm(test$RA_collect~test$ADJ_COVR))
 summary(lm(test$RA_herb~test$ADJ_COVR))
@@ -66,7 +79,8 @@ summary(pred.aov)
 summary(herb.aov)
 summary(collect.aov)
 TukeyHSD(detrit.aov) # why isn't this working?
-### type 1 anova and summary of aovs
+
+### Below are type 2 ANOVAS
 Anova(anova_detrit, type= "II")
 anova_herb<- aov(test$RA_herb~test$YEAR*test$ADJ_COVR)
 Anova(anova_herb, type= "II")
@@ -74,7 +88,12 @@ anova_collect<- aov(test$RA_collect~test$YEAR*test$ADJ_COVR)
 Anova(anova_collect, type= "II")
 anova_pred<- aov(test$RA_pred~test$YEAR*test$ADJ_COVR)
 Anova(anova_pred, type= "II")
-### attempt to use type 2 anova
+
+### Testing interactions between year and ADJ_COVER.
+### There seems to be very little interaction.
+##  #NF These plots below look beautiful!!! I've never made ones like this.
+# I noticed they are still including all the adjacent covers, not just
+# the 4 that we chose. Is there a way to only do the 4 we want to focus on?
 interaction.plot(x.factor = test$YEAR,
                  trace.factor = test$ADJ_COVR,
                  response = test$RA_detrit)
@@ -87,8 +106,6 @@ interaction.plot(x.factor = test$YEAR,
 interaction.plot(x.factor = test$YEAR,
                  trace.factor = test$ADJ_COVR,
                  response = test$RA_pred)
-###testing interactions between year and ADJ_COVER- seems to be very little interaction
-
 ##################################################
 ##                RUN ASSUMPTIONS               ##
 ##################################################
@@ -100,17 +117,20 @@ detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
 summary(detrit.lm)
 detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
 summary(detrit.lm)
-boxplot(Detritivore ~ ADJ_COVR, data = coverdata)
+boxplot(Detritivore ~ ADJ_COVR, data = coverdata) # This doesn't return
+  # anything of value.
 ##################################################
 ##                 TO DO                        ##
 ##################################################
 ### 
 ### 1. How do we run assumptions tests on data that
 ####      is using proportions?
+##### Answer:
 ### 2. How do we aggregate all the data (year, relative abundance, land cover)
 ####      so we can run proper analyses?
+##### Answer:
 ### 3. Is our current anova correct? Why isn't the Tukey HSD working?
-### 4. 
+##### Answer:
 ##################################################
 ##################################################
 ##################################################
