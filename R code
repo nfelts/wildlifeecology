@@ -51,13 +51,19 @@ count(coverdata, "ADJ_COVR") # count of all cover types.
 ### check data (#NF How? What are you doing to check the data and
 ### what does it tell us? Since I wasn't there, this notation doesn't 
 ### make sense to me.)
+### (#NR I checked how the different values were coded- 
+### IE I made sure that ADJ_COVR was a factor and Detritivores was a number)
 str(coverdata)
 
 ### convert YEAR to a factor. (#NF Could you explain why you did this?)
+### (#NR it was previously coded as a number, but for us it's a categorey so I recoded it)
 coverdata$YEAR <- (factor(coverdata$YEAR))
 
 ### remove irrelevent rows by cover. (#NF Are you making a subset of 
 ### our data with only these 4 cover groups? Awesome!)
+### (NF- Yes, but as we see later it still includes the other values :(
+### I will send you the most updated cover_data file I made in excel that removes those) 
+
 test <- subset(coverdata, ADJ_COVR=="FR"|ADJ_COVR=="PA"|ADJ_COVR=="PV"|ADJ_COVR=="CP")
 
 anova_detrit<- aov(test$RA_detrit~test$ADJ_COVR)
@@ -119,6 +125,28 @@ detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
 summary(detrit.lm)
 boxplot(Detritivore ~ ADJ_COVR, data = coverdata) # This doesn't return
   # anything of value.
+  
+### (#NR The below is updated with numberic rather than proportional abundance)
+### See if data is normally distributed using histogram and qq plots
+
+hist(coverdata$Detritivore) ##right skewed
+hist(coverdata$Herbivore) ##right skewed
+hist(coverdata$Predator) ##right skewed
+hist(coverdata$Collector) ##normal?
+qqPlot(coverdata$Detritivore)
+qqPlot(coverdata$Herbivore)
+qqPlot(coverdata$Predator)
+qqPlot(coverdata$Collector)
+
+### tested detrit residual plots
+### need another test of homoscedasticity
+detritivore.lm = lm( Detritivore~ ADJ_COVR, data=coverdata) 
+detritivore.res = resid(detritivore.lm)
+plot( detritivore.res, test$ADJ_COVR,
+    ylab="Residuals", xlab="Cover", 
+    main="Detrit Residuals") 
+abline(0, 0)    
+
 ##################################################
 ##                 TO DO                        ##
 ##################################################
