@@ -138,14 +138,24 @@ qqPlot(coverdata$Herbivore)
 qqPlot(coverdata$Predator)
 qqPlot(coverdata$Collector)
 
-### tested detrit residual plots
-### need another test of homoscedasticity
-detritivore.lm = lm( Detritivore~ ADJ_COVR, data=coverdata) 
-detritivore.res = resid(detritivore.lm)
-plot( detritivore.res, test$ADJ_COVR,
-    ylab="Residuals", xlab="Cover", 
-    main="Detrit Residuals") 
-abline(0, 0)    
+
+### test for heteroscedacity
+### #NF bptest is supposedly more robust- how do we transform heteroscedactic data?
+detritivore.lm = lm( Detritivore ~ ADJ_COVR, data=coverdata) 
+bptest(detritivore.lm) #homoscedactic
+ncvTest(detritivore.lm) #heteroscedactic
+
+collector.lm= lm(Collector~ADJ_COVR, data=coverdata)
+bptest(collector.lm) #homoscedactic
+ncvTest(collector.lm) #homoscedactic
+
+herbivore.lm= lm(Herbivore~ADJ_COVR, data=coverdata)
+bptest(herbivore.lm) #heteroscedactic
+ncvTest(herbivore.lm) #heteroscedactic
+
+predator.lm= lm(Predator~ADJ_COVR, data=coverdata)
+bptest(predator.lm) #homoscedactic
+ncvTest(predator.lm) #homoscedactic
 
 ##################################################
 ##                 TO DO                        ##
