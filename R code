@@ -46,7 +46,175 @@ attach(coverdata)
 count(coverdata, "ADJ_COVR") # count of all cover types.
 ## We chose 4 covers to be our variables. 
 ### CP = cropland, FR = Forest, PA = pasture, PV = paved road
+##################################################
+######### Nicole Felts ### Nava Rastegar #########
+###### Wildlife Ecology End of Term Project ######
+##################################################
+##################################################
+################### GOALS ########################
+# To understand the relationship between 4 stream-adjacent land cover types
+# and the relative abundance of 4 macroinvertebrate classifications over ~ 9 years.
+##################################################
+##################################################
+getwd() #Check working directory.
+# Adjust working directory for the data as necessary.
+setwd("C:/Users/nef21/Downloads")
+######    THIS IS OUR CURRENT CSV FILE !!!!! #####
+coverdata <- read.csv("cover_w_watershed.csv", header=TRUE)
+attach(coverdata) # attach the dataframe so we don't have to keep typing it every time.
+##################################################
+##################################################
+##################################################
+## #NF Can you please explain the notations below?
+# two fixed effects: land use and year & those two combined. 
+# random effect: watershed & stream order which is nested within watershed.
+# run assumption tests; is it normally dist, risid are random, indept
+# 
+##################################################
+##################################################
+##################################################
+##                INSTALL PACKAGES              ##
+##################################################
+#install packages below if necessary by removing the hashtags below.
+#### #NF GETTING AN ERROR? If the package is not installing properly, 
+#### change the download location in the library.
+# install.packages("dplyr")
+# install.packages("plyr")
+# install.packages("lme4")
+# install.packages("car")
 
+library(dplyr)
+library(plyr)
+library(lme4)
+library(car)
+##################################################
+##          CODE FOR EXPLORATORY ANALYSIS       ##
+##################################################
+attach(coverdata)
+count(coverdata, "ADJ_COVR") # count of all cover types.
+## We chose 4 covers to be our variables. 
+### CP = cropland, FR = Forest, PA = pasture, PV = paved road
+
+
+### check data (#NF How? What are you doing to check the data and
+### what does it tell us? Since I wasn't there, this notation doesn't 
+### make sense to me.)
+str(coverdata)
+
+### convert YEAR to a factor. (#NF Could you explain why you did this?)
+coverdata$YEAR <- (factor(coverdata$YEAR))
+
+### remove irrelevent rows by cover. (#NF Are you making a subset of 
+### our data with only these 4 cover groups? Awesome!)
+test <- subset(coverdata, ADJ_COVR=="FR"|ADJ_COVR=="PA"|ADJ_COVR=="PV"|ADJ_COVR=="CP")
+anova_detrit<- aov(test$RA_detrit~test$ADJ_COVR)
+anova_detrit #NF this did not return anything significant
+detrit.aov <- anova(lm(test$RA_detrit~test$ADJ_COVR))
+detrit.aov #NF this returned a significant p value.
+pred.aov <- anova(lm(test$RA_pred~test$ADJ_COVR))
+pred.aov #NF this returned a significant p value.
+herb.aov <- anova(lm(test$RA_herb~test$ADJ_COVR))
+herb.aov #NF this returned a slightly significant p value.
+collect.aov <- anova(lm(test$RA_collect~test$ADJ_COVR))
+collect.aov #NF this returned a very significant p value.
+summary(lm(test$RA_detrit~test$ADJ_COVR))
+summary(lm(test$RA_collect~test$ADJ_COVR))
+summary(lm(test$RA_herb~test$ADJ_COVR))
+summary(lm(test$RA_pred~test$ADJ_COVR))
+summary(detrit.aov)
+summary(pred.aov)
+summary(herb.aov)
+summary(collect.aov)
+TukeyHSD(detrit.aov) # why isn't this working?
+
+### Below are type 2 ANOVAS
+Anova(anova_detrit, type= "II")
+anova_herb<- aov(test$RA_herb~test$YEAR*test$ADJ_COVR)
+Anova(anova_herb, type= "II")
+anova_collect<- aov(test$RA_collect~test$YEAR*test$ADJ_COVR)
+Anova(anova_collect, type= "II")
+anova_pred<- aov(test$RA_pred~test$YEAR*test$ADJ_COVR)
+Anova(anova_pred, type= "II")
+
+### Testing interactions between year and ADJ_COVER.
+### There seems to be very little interaction.
+##  #NF These plots below look beautiful!!! I've never made ones like this.
+# I noticed they are still including all the adjacent covers, not just
+# the 4 that we chose. Is there a way to only do the 4 we want to focus on?
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_detrit, xlab="Year", ylab="Detritivore Relative Abundance", main="Detritivore Relative Abundance per Adjacent Cover Type by Year") #edit the legend for this
+legend(1, 95, legend=c("Line 1", "Line 2"),
+       col=c("red", "blue"), lty=1:2, cex=0.8) ##NF How can we alter this code to make a legend for our data?
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_collect)
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_herb)
+interaction.plot(x.factor = test$YEAR,
+                 trace.factor = test$ADJ_COVR,
+                 response = test$RA_pred)
+##################################################
+##                RUN ASSUMPTIONS               ##
+##################################################
+detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
+summary(detrit.lm)
+collect.lm <- lm(RA_collect ~ ADJ_COVR, data = coverdata)
+summary(collect.lm)
+detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
+summary(detrit.lm)
+detrit.lm <- lm(RA_detrit ~ ADJ_COVR, data = coverdata)
+summary(detrit.lm)
+boxplot(Detritivore ~ ADJ_COVR, data = coverdata) # This doesn't return
+  # anything of value.
+##################################################
+##                 TO DO                        ##
+##################################################
+### 
+### 1. How do we run assumptions tests on data that
+####      is using proportions?
+##### Answer:
+### 2. How do we aggregate all the data (year, relative abundance, land cover)
+####      so we can run proper analyses?
+##### Answer:
+### 3. Is our current anova correct? Why isn't the Tukey HSD working?
+##### Answer:
+##################################################
+##################################################
+##################################################
+##################################################
+##################################################
+##    OLD CODE WHERE WE MANIPULATED THE DATA    ##
+##    THAT WE DON'T NEED TO RUN ANY MORE        ##
+##################################################
+# Load in each data file.
+taxadata  <- read.csv("taxadata.csv", header=TRUE)
+LULC  <- read.csv("LULC.csv", header=TRUE)
+# We merged the taxa data and the land use files.
+data<- merge(taxadata, LULC)
+# We removed the N/As from the ADJ_COVR column.
+data_no_null<- data[!(data$ADJ_COVR=="N/A"),]
+# We removed the adjacent covers with more than one type by deleting everything
+# where the string was greater than 3 characters.
+data3 <- data_no_null[!nchar(as.character(data_no_null$ADJ_COVR))> 3,]
+# REMOVED THE ADJ_COVR LF & OR BECAUSE IT DIDNT HAVE ENOUGH DATA
+data4 <- data3[!(data3$ADJ_COVR=="LF"),]
+coverdata <- data4[!(data4$ADJ_COVR=="OR"),]
+# WROTE NEW CSV FOR FINAL MANIPULATED DATA
+write.csv(coverdata, 'simplecoverdata.csv')
+# load in the watershed data
+watersheddata  <- read.csv("Points_in_watersheds.csv", header=TRUE)
+# We merged the simplecoverdata and the watershed points.
+finaldata<- merge(coverdata, watersheddata)
+##################################################
+##################################################
+##############      EXTRA CODE       ############
+# count of all the different taxa observed per group
+tapply(MBSSdata$N_TAXA, MBSSdata$FFG_Swan, sum)
+sum(MBSSdata$N_TAXA)
+57373/248449
+# 23.1% detritivores total
 
 ### check data (#NF How? What are you doing to check the data and
 ### what does it tell us? Since I wasn't there, this notation doesn't 
