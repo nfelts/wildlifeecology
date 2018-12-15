@@ -161,6 +161,39 @@ hist(coverdata$CTrans)
 hist(coverdata$HTrans)
 hist(coverdata$PTrans)
 
+#plot residuals for transformed data
+dtrans.lm = lm(DTrans ~ ADJ_COVR , data=coverdata) 
+dtrans.res = resid(dtrans.lm)
+
+plot(ADJ_COVR, dtrans.res, 
+     ylab="Residuals", xlab="Adjacent Cover", 
+     main="Detritivore") 
+abline(0, 0)
+
+ptrans.lm = lm(PTrans ~ ADJ_COVR , data=coverdata) 
+ptrans.res = resid(ptrans.lm)
+
+plot(ADJ_COVR, ptrans.res, 
+     ylab="Residuals", xlab="Adjacent Cover", 
+     main="Predator") 
+abline(0, 0)
+
+htrans.lm = lm(HTrans ~ ADJ_COVR , data=coverdata) 
+htrans.res = resid(htrans.lm)
+
+plot(ADJ_COVR, htrans.res, 
+     ylab="Residuals", xlab="Adjacent Cover", 
+     main="Herbivore") 
+abline(0, 0)
+
+ctrans.lm = lm(CTrans ~ ADJ_COVR , data=coverdata) 
+ctrans.res = resid(ctrans.lm)
+
+plot(ADJ_COVR, ctrans.res, 
+     ylab="Residuals", xlab="Adjacent Cover", 
+     main="Collector") 
+abline(0, 0)
+
 #anovas for transformed data 
 detrit_mod.aov<-aov(coverdata$DTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
 summary(detrit_mod.aov) ###highly significant
@@ -172,10 +205,10 @@ pred_mod.aov<-aov(coverdata$PTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/cov
 summary(pred_mod.aov) ###highly significant
 
 # tukey for transformed data
-TukeyHSD(detrit_mod.aov)
-TukeyHSD(collect_mod.aov)
-TukeyHSD(herb_mod.aov)
-TukeyHSD(pred_mod.aov)
+TukeyHSD(detrit_mod.aov) #strong p for PA-CP, PA_FR 
+TukeyHSD(collect_mod.aov) #strong p for FR-CP, PA-CP, PV-FR, PV-PA
+TukeyHSD(herb_mod.aov) #strong p for PV-CP, PV-FR
+TukeyHSD(pred_mod.aov) #strong p for FR-CP, PA-FR, PV-FR 
 
 #### chi squared test ####
 # create table with the sum of each guild in each landcover
