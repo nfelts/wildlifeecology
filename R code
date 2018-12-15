@@ -149,6 +149,55 @@ qqPlot(coverdata$Collector)
   bptest(predator.lm) #homoscedactic
   ncvTest(predator.lm) #homoscedactic
   
+#transform data using log
+coverdata$DTrans <- log(coverdata$Detritivore + 1)
+coverdata$CTrans <- log(coverdata$Collector + 1)
+coverdata$HTrans <- log(coverdata$Herbivore + 1)
+coverdata$PTrans <- log(coverdata$Predator + 1)
+
+# run histograms again- looks more normal
+hist(coverdata$DTrans)
+hist(coverdata$CTrans)
+hist(coverdata$HTrans)
+hist(coverdata$PTrans)
+
+#anovas for transformed data 
+detrit_mod.aov<-aov(coverdata$DTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
+summary(detrit_mod.aov) ###highly significant
+collect_mod.aov<-aov(coverdata$CTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
+summary(collect_mod.aov) ###highly significant
+herb_mod.aov<-aov(coverdata$HTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
+summary(herb_mod.aov) ###minorly significant
+pred_mod.aov<-aov(coverdata$PTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
+summary(pred_mod.aov) ###highly significant
+
+# tukey for transformed data
+TukeyHSD(detrit_mod.aov)
+TukeyHSD(collect_mod.aov)
+TukeyHSD(herb_mod.aov)
+TukeyHSD(pred_mod.aov)
+
+#### chi squared test ####
+# create table with the sum of each guild in each landcover
+cover_guild <- coverdata %>%
+  group_by(ADJ_COVR) %>%
+  summarise(Detritivore = sum(Detritivore), Collector=sum(Collector), Herbivore=sum(Herbivore), Predator=sum(Predator))
+#Copy and then import the table from CSV because I could not figure out how to make the ChiSq function work on the values in R
+cover_guild <- read.csv("chisq_table.csv", header=TRUE, row.names = 1)
+#Run test
+my.chi= chisq.test(cover_guild)
+#check residuals
+my.chi[["residuals"]]
+#check p value
+my.chi[["p.value"]]
+
+#check goodness of fit
+obs.values= my.chi[["observed"]]
+exp.values= my.chi[["expected"]]
+my.chi= chisq.test(obs.values, p=exp.values, rescale.p = TRUE)
+my.chi
+
+
   ##################################################
   ##                 TO DO                        ##
   ##################################################
