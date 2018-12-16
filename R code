@@ -194,10 +194,12 @@ plot(ADJ_COVR, ctrans.res,
      main="Collector") 
 abline(0, 0)
 
-#anovas for transformed data 
+#anovas for transformed data - except collector which was more normal w/o transformation 
+
 detrit_mod.aov<-aov(coverdata$DTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
 summary(detrit_mod.aov) ###highly significant
-collect_mod.aov<-aov(coverdata$CTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
+plot(detrit_mod.aov)
+collect_mod.aov<-aov(coverdata$Collector~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
 summary(collect_mod.aov) ###highly significant
 herb_mod.aov<-aov(coverdata$HTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
 summary(herb_mod.aov) ###minorly significant
@@ -205,30 +207,39 @@ pred_mod.aov<-aov(coverdata$PTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/cov
 summary(pred_mod.aov) ###highly significant
 
 # tukey for transformed data
-TukeyHSD(detrit_mod.aov) #strong p for PA-CP, PA_FR 
-TukeyHSD(collect_mod.aov) #strong p for FR-CP, PA-CP, PV-FR, PV-PA
-TukeyHSD(herb_mod.aov) #strong p for PV-CP, PV-FR
-TukeyHSD(pred_mod.aov) #strong p for FR-CP, PA-FR, PV-FR 
+# capitalized cover is the one that has the higher avg no. MIs
+detrit_tukey <- TukeyHSD(detrit_mod.aov) #strong p for pa-CP, pa-FR, 
+plot(detrit_tukey)
+collect_tukey <- TukeyHSD(collect_mod.aov)#strong p for PA-cp, pv-PA, pa-FR
+plot(collect_tukey)
+herb_tukey <- TukeyHSD(herb_mod.aov) #strong p for pv-CP,pv-FR
+plot(herb_tukey)
+pred_tukey <- TukeyHSD(pred_mod.aov) #strong p for FR-cp, pa-FR, pv-FR 
+plot(pred_tukey)
 
-#### chi squared test ####
-# create table with the sum of each guild in each landcover
+
+# create table with the count of each landcover
+cover_count<- coverdata %>%
+  count(ADJ_COVR)
+  
+#create pie chart
+slices <- cover_count$n
+lbls <- c("CP", "FR", "PA", "PV")
+pie(slices, labels=lbls, main="Land Cover")
+
+# create table with the sum of each group in each landcover
 cover_guild <- coverdata %>%
   group_by(ADJ_COVR) %>%
   summarise(Detritivore = sum(Detritivore), Collector=sum(Collector), Herbivore=sum(Herbivore), Predator=sum(Predator))
-#Copy and then import the table from CSV because I could not figure out how to make the ChiSq function work on the values in R
-cover_guild <- read.csv("chisq_table.csv", header=TRUE, row.names = 1)
-#Run test
-my.chi= chisq.test(cover_guild)
-#check residuals
-my.chi[["residuals"]]
-#check p value
-my.chi[["p.value"]]
+  
+#Import the table from CSV because I could not figure out how to make the graph work on the values in R
+cover_guild2 <- read.csv("chisq_table.csv", header=TRUE, row.names = 1)
 
-#check goodness of fit
-obs.values= my.chi[["observed"]]
-exp.values= my.chi[["expected"]]
-my.chi= chisq.test(obs.values, p=exp.values, rescale.p = TRUE)
-my.chi
+#convert to matrix
+cover_guild3 <- data.matrix(cover_guild2)
+
+#create barplot
+barplot.default(cover_guild3, beside=TRUE, legend=TRUE) 
 
 
   ##################################################
