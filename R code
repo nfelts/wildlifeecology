@@ -198,7 +198,6 @@ abline(0, 0)
 
 detrit_mod.aov<-aov(coverdata$DTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
 summary(detrit_mod.aov) ###highly significant
-plot(detrit_mod.aov)
 collect_mod.aov<-aov(coverdata$Collector~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
 summary(collect_mod.aov) ###highly significant
 herb_mod.aov<-aov(coverdata$HTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
