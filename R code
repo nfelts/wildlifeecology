@@ -150,10 +150,10 @@ qqPlot(coverdata$Collector)
   ncvTest(predator.lm) #homoscedactic
   
 #transform data using log
-coverdata$DTrans <- log(coverdata$Detritivore + 1)
-coverdata$CTrans <- log(coverdata$Collector + 1)
-coverdata$HTrans <- log(coverdata$Herbivore + 1)
-coverdata$PTrans <- log(coverdata$Predator + 1)
+coverdata$DTrans <- log10(coverdata$Detritivore + 1)
+coverdata$CTrans <- log10(coverdata$Collector + 1)
+coverdata$HTrans <- log10(coverdata$Herbivore + 1)
+coverdata$PTrans <- log10(coverdata$Predator + 1)
 
 # run histograms again- looks more normal
 hist(coverdata$DTrans)
