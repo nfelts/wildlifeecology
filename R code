@@ -161,59 +161,45 @@ hist(coverdata$CTrans)
 hist(coverdata$HTrans)
 hist(coverdata$PTrans)
 
-#plot residuals for transformed data
-dtrans.lm = lm(DTrans ~ ADJ_COVR , data=coverdata) 
-dtrans.res = resid(dtrans.lm)
+#multi-effect linear model for transformed data - except collector which was more normal w/o transformation 
 
-plot(ADJ_COVR, dtrans.res, 
-     ylab="Residuals", xlab="Adjacent Cover", 
-     main="Detritivore") 
-abline(0, 0)
+detrit_mod.lme<- lme(DTrans~ADJ_COVR, random =~1|MDE8Digit, data=coverdata)
+summary(detrit_mod.lme) #sig for PA
 
-ptrans.lm = lm(PTrans ~ ADJ_COVR , data=coverdata) 
-ptrans.res = resid(ptrans.lm)
+detrit_mod_res <- resid(detrit_mod.lme)
+plot(detrit_mod_res)
 
-plot(ADJ_COVR, ptrans.res, 
-     ylab="Residuals", xlab="Adjacent Cover", 
-     main="Predator") 
-abline(0, 0)
+collect_mod.lme<- lme(Collector~ADJ_COVR, random =~1|MDE8Digit, data=coverdata)
+summary(collect_mod.lme) #sig for PA and FR
 
-htrans.lm = lm(HTrans ~ ADJ_COVR , data=coverdata) 
-htrans.res = resid(htrans.lm)
+collect_mod_res <- resid(collect_mod.lme)
+plot(collect_mod_res)
 
-plot(ADJ_COVR, htrans.res, 
-     ylab="Residuals", xlab="Adjacent Cover", 
-     main="Herbivore") 
-abline(0, 0)
+herb_mod.lme<- lme(HTrans~ADJ_COVR, random =~1|MDE8Digit, data=coverdata)
+summary(herb_mod.lme)#sig for none
 
-ctrans.lm = lm(CTrans ~ ADJ_COVR , data=coverdata) 
-ctrans.res = resid(ctrans.lm)
+herb_mod_res <- resid(herb_mod.lme)
+plot(herb_mod_res)
 
-plot(ADJ_COVR, ctrans.res, 
-     ylab="Residuals", xlab="Adjacent Cover", 
-     main="Collector") 
-abline(0, 0)
+pred_mod.lme<- lm(PTrans~ADJ_COVR, data=coverdata)
+summary(pred_mod.lme)# sig for FR
 
-#anovas for transformed data - except collector which was more normal w/o transformation 
-
-detrit_mod.aov<-aov(coverdata$DTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
-summary(detrit_mod.aov) ###highly significant
-collect_mod.aov<-aov(coverdata$Collector~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
-summary(collect_mod.aov) ###highly significant
-herb_mod.aov<-aov(coverdata$HTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
-summary(herb_mod.aov) ###minorly significant
-pred_mod.aov<-aov(coverdata$PTrans~coverdata$ADJ_COVR+(1/coverdata$MDE8Digit/coverdata$STREAM_ORDER))
-summary(pred_mod.aov) ###highly significant
+pred_mod_res <- resid(pred_mod.lme)
+plot(pred_mod_res)
+### residuals all look normal
 
 # tukey for transformed data
-# capitalized cover is the one that has the higher avg no. MIs
-detrit_tukey <- TukeyHSD(detrit_mod.aov) #strong p for pa-CP, pa-FR, 
+# capitalized cover is the one that has the higher avg # MIs
+
+detrit_tukey <- lsmeans(detrit_mod.lme, pairwise~ADJ_COVR, adjust="tukey")#strong p for FR-pa
+collect_tukey <- lsmeans(collect_mod.lme, pairwise~ADJ_COVR, adjust="tukey")#strong p for cp-PA, PA-pv, fr-PA
+herb_tukey <- lsmeans(herb_mod.lme, pairwise~ADJ_COVR, adjust="tukey")#strong p for none
+pred_tukey <- lsmeans(pred_mod.lme, pairwise~ADJ_COVR, adjust="tukey") #strong p for FR-cp, pv-FR , FR-cp
+
+#plot range of means
 plot(detrit_tukey)
-collect_tukey <- TukeyHSD(collect_mod.aov)#strong p for PA-cp, pv-PA, pa-FR
 plot(collect_tukey)
-herb_tukey <- TukeyHSD(herb_mod.aov) #strong p for pv-CP,pv-FR
 plot(herb_tukey)
-pred_tukey <- TukeyHSD(pred_mod.aov) #strong p for FR-cp, pa-FR, pv-FR 
 plot(pred_tukey)
 
 
