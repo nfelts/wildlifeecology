@@ -123,10 +123,30 @@ coverdata$YEAR <- (factor(coverdata$YEAR))
   ### (#NR The below is updated with numberic rather than proportional abundance)
   ### See if data is normally distributed using histogram and qq plots
   
-hist(coverdata$Detritivore) ##right skewed
-hist(coverdata$Herbivore) ##right skewed
-hist(coverdata$Predator) ##right skewed
-hist(coverdata$Collector) ##normal?
+hist(coverdata$Detritivore, 
+     main="Histogram of Untransformed Detritivore Abundance", 
+     xlab="Detritivore Abundance", 
+     border="blue", 
+     col="green",
+     las=1,) ##right skewed
+hist(coverdata$Herbivore,
+     main="Histogram of Untransformed Herbivore Abundance", 
+     xlab="Herbivore Abundance", 
+     border="blue", 
+     col="green",
+     las=1,) ##right skewed
+hist(coverdata$Predator,
+     main="Histogram of Untransformed Predator Abundance", 
+     xlab="Predator Abundance", 
+     border="blue", 
+     col="green",
+     las=1,) ##right skewed
+hist(coverdata$Collector,
+     main="Histogram of Untransformed Collector Abundance", 
+     xlab="Collector Abundance", 
+     border="blue", 
+     col="green",
+     las=1,) ##normal?
 qqPlot(coverdata$Detritivore)
 qqPlot(coverdata$Herbivore)
 qqPlot(coverdata$Predator)
